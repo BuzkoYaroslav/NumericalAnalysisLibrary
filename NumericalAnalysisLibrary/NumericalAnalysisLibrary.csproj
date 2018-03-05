@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{46DB5E9D-7E5D-45DB-A618-DE44746C67CF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NumericalAnalysisLibrary</RootNamespace>
+    <AssemblyName>NumericalAnalysisLibrary</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Constants.cs" />
+    <Compile Include="FunctionApproximationMethods\FunctionMethod.cs" />
+    <Compile Include="FunctionApproximationMethods\LagranzFunction.cs" />
+    <Compile Include="FunctionApproximationMethods\MinSquareFunction.cs" />
+    <Compile Include="FunctionApproximationMethods\NewtonFunction.cs" />
+    <Compile Include="MathStructures\Inequality.cs" />
+    <Compile Include="SystemMethods\HoleckiiMethod.cs" />
+    <Compile Include="MathStructures\Equation.cs" />
+    <Compile Include="KoshiTaskMethods\AdamsMethod.cs" />
+    <Compile Include="BoudaryValueProblemMethods\BoundaryValueTaskSolver.cs" />
+    <Compile Include="BoudaryValueProblemMethods\BoundaryValueTask.cs" />
+    <Compile Include="BoudaryValueProblemMethods\CollocationMethod.cs" />
+    <Compile Include="BoudaryValueProblemMethods\GridMethod.cs" />
+    <Compile Include="EquationMethods\ChordMethod.cs" />
+    <Compile Include="EquationMethods\EquationMethod.cs" />
+    <Compile Include="IntegralMethods\GaussIntegralMethod.cs" />
+    <Compile Include="SystemMethods\SimpleIterationSystem.cs" />
+    <Compile Include="SystemMethods\GaussMethod.cs" />
+    <Compile Include="EquationMethods\GenericIteration.cs" />
+    <Compile Include="EquationMethods\HalfDivision.cs" />
+    <Compile Include="IntegralMethods\IntegralMethod.cs" />
+    <Compile Include="KoshiTaskMethods\KoshiTask.cs" />
+    <Compile Include="Functions\MathFunction.cs" />
+    <Compile Include="MathStructures\Matrix.cs" />
+    <Compile Include="Method.cs" />
+    <Compile Include="EquationMethods\NewtonMethod.cs" />
+    <Compile Include="Functions\MultiMathFunction.cs" />
+    <Compile Include="MathStructures\Polynomial.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EquationMethods\SimpleIteration.cs" />
+    <Compile Include="IntegralMethods\RectangularMethod.cs" />
+    <Compile Include="IntegralMethods\SimpsonMethod.cs" />
+    <Compile Include="KoshiTaskMethods\RungeKuttaMethod.cs" />
+    <Compile Include="MathStructures\SLAE.cs" />
+    <Compile Include="SystemMethods\SystemMethod.cs" />
+    <Compile Include="IntegralMethods\TrapezoidMethod.cs" />
+    <Compile Include="MathStructures\Vector.cs" />
+    <Compile Include="SystemMethods\ZeidelMethod.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
