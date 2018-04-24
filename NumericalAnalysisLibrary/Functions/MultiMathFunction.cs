@@ -19,6 +19,9 @@ namespace NumericalAnalysisLibrary
 
         public override string ToString()
         {
+            if (coef == 0 || functions.Count == 0)
+                return "0";
+
             string result = coef != 1 ? Math.Round(coef, 2) + " * " : "" + "(";
             string splitter = type == MultiMathFunctionType.Addition ? " + " : type == MultiMathFunctionType.Multiplication ? " * " : " : ";
 

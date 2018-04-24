@@ -14,7 +14,7 @@ namespace NumericalAnalysisLibrary
         {
             this.coef = coef;
 
-            functions.Add(foundation);
+            functions.Add(foundation.Clone() as MathFunction);
         }
 
         public override double Calculate(double x)
@@ -50,6 +50,11 @@ namespace NumericalAnalysisLibrary
         {
             return new CosFunction(coef * this.coef, functions[0]);
         }
+
+        public override object Clone()
+        {
+            return new CosFunction(coef, functions[0]);
+        }
     }
     public class SinFunction: MathFunction
     {
@@ -57,7 +62,7 @@ namespace NumericalAnalysisLibrary
         {
             this.coef = coef;
 
-            functions.Add(foundation);
+            functions.Add(foundation.Clone() as MathFunction);
         }
 
         public override double Calculate(double x)
@@ -93,14 +98,19 @@ namespace NumericalAnalysisLibrary
         {
             return new SinFunction(coef * this.coef, functions[0]);
         }
+
+        public override object Clone()
+        {
+            return new SinFunction(coef, functions[0]);
+        }
     }
     public class PowerFunction: MathFunction
     {
         public PowerFunction(double coef, MathFunction foundation, MathFunction power): base()
         {
             this.coef = coef;
-            functions.Add(foundation);
-            functions.Add(power);
+            functions.Add(foundation.Clone() as MathFunction);
+            functions.Add(power.Clone() as MathFunction);
         }
 
         public override double Calculate(double x)
@@ -133,6 +143,11 @@ namespace NumericalAnalysisLibrary
         {
             return new PowerFunction(coef * this.coef, functions[0], functions[1]);
         }
+
+        public override object Clone()
+        {
+            return new PowerFunction(coef, functions[0], functions[1]);
+        }
     }
     public class StepFunction : PowerFunction
     {
@@ -148,6 +163,11 @@ namespace NumericalAnalysisLibrary
             return new PowerFunction(1.0, f, g) * new LnFunction(1.0, f) * g.Derivative(1);
 
         }
+
+        public override object Clone()
+        {
+            return new StepFunction(coef, functions[0], functions[1]);
+        }
     }
     public class LnFunction: MathFunction
     {
@@ -155,7 +175,7 @@ namespace NumericalAnalysisLibrary
         {
             this.coef = coef;
 
-            functions.Add(foundation);
+            functions.Add(foundation.Clone() as MathFunction);
         }
 
         public override double Calculate(double x)
@@ -189,6 +209,11 @@ namespace NumericalAnalysisLibrary
         protected override MathFunction Multiply(double coef)
         {
             return new LnFunction(coef * this.coef, functions[0]);
+        }
+
+        public override object Clone()
+        {
+            return new LnFunction(coef, functions[0]);
         }
     }
     public class ConstFunction: MathFunction
@@ -228,6 +253,10 @@ namespace NumericalAnalysisLibrary
             return new ConstFunction(coef * this.coef);
         }
 
+        public override object Clone()
+        {
+            return new ConstFunction(coef);
+        }
     }
     public class XFunction: MathFunction
     {
@@ -266,12 +295,55 @@ namespace NumericalAnalysisLibrary
         {
             return new XFunction(coef * this.coef);
         }
+
+        public override object Clone()
+        {
+            return new XFunction(coef);
+        }
+    }
+    public class AbsFunction: MathFunction
+    {
+        public AbsFunction(double coef, MathFunction foundation)
+        {
+            this.coef = coef;
+
+            if (coef != 0)
+                functions.Add(foundation.Clone() as MathFunction);
+        }
+
+        public override MathFunction Derivative(int order)
+        {
+            throw new InvalidOperationException(Constants.MathFunctionConstants.derivativeDoesNotExistExceptionMessage);
+        }
+
+        public override double Calculate(double x)
+        {
+            return Math.Abs(functions[0].Calculate(x));
+        }
+
+        public override string ToString()
+        {
+            return string.Format("|{0}|", functions[0].ToString());
+        }
+
+        public override bool IsZero()
+        {
+            return functions[0].IsZero();
+        }
+
+        protected override MathFunction MinusFunction()
+        {
+            return new AbsFunction(-coef, functions[0]);
+        }
+
+        public override object Clone()
+        {
+            return new AbsFunction(coef, functions[0]);
+        }
     }
 
-    public class MathFunction
+    public class MathFunction: ICloneable
     {
-        
-
         private delegate bool Condition(double f, double best);
         private delegate bool SingleCondition(double f);
 
@@ -333,6 +405,16 @@ namespace NumericalAnalysisLibrary
             }
         }
         #endregion
+
+        public virtual object Clone()
+        {
+            List<MathFunction> funcs = new List<MathFunction>();
+
+            foreach (MathFunction func in functions)
+                funcs.Add(func.Clone() as MathFunction);
+
+            return new MathFunction(coef, type, funcs.ToArray());
+        }
 
         #region Bool features
         public virtual bool IsZero()
@@ -429,10 +511,10 @@ namespace NumericalAnalysisLibrary
         #region Public methods
         private void InitializeDivision(MathFunction[] functions)
         {
-            MathFunction up = new MathFunction(1.0d, MathFunctionType.Multiplication);
-            MathFunction low = new MathFunction(1.0d, MathFunctionType.Multiplication);
+            MathFunction up = functions[0];
+            MathFunction low = functions[1];
 
-            for (int i = 0; i < functions.Length; i++)
+            for (int i = 2; i < functions.Length; i++)
             {
                 if (i % 2 == 0)
                     up *= functions[i];
@@ -521,7 +603,7 @@ namespace NumericalAnalysisLibrary
         }
         public override string ToString()
         {
-            string result = coef != 1 ? Math.Round(coef, 2) + " * " : "" + "(";
+            string result = coef != 1 ? Math.Round(coef, 2) + " * (" : "(";
             string splitter = type == MathFunctionType.Sum ? " + " : type == MathFunctionType.Multiplication ? " * " : " : ";
 
             for (int i = 0; i < functions.Count; i++)
@@ -670,7 +752,6 @@ namespace NumericalAnalysisLibrary
 
             return result;
         }
-
         #endregion
     }
 }

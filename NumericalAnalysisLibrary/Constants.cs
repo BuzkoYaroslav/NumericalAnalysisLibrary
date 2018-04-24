@@ -61,5 +61,10 @@ namespace NumericalAnalysisLibrary
             internal const double epsilanIter = 0.001;
             internal const int maxIterationCount = 10000000;
         }
+
+        internal static class MathFunctionConstants
+        {
+            internal const string derivativeDoesNotExistExceptionMessage = "Derivative does not exist!";
+        }
     }
 }
