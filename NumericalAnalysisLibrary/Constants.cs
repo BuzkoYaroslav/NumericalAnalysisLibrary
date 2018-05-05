@@ -66,5 +66,11 @@ namespace NumericalAnalysisLibrary
         {
             internal const string derivativeDoesNotExistExceptionMessage = "Derivative does not exist!";
         }
+        internal static class MultiMathFunctionsConstants
+        {
+            internal const int countOfSolutions = 10;
+
+            internal const string denominatorIsZeroException = "Denominator cannot be equal to zero!";
+        }
     }
 }

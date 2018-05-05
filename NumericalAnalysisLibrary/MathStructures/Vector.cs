@@ -8,6 +8,8 @@ namespace NumericalAnalysisLibrary
 {
     public class Vector
     {
+        private const int numberOfSignsAfterCommaInStringRepresentation = 4;
+
         double[] elements;
 
         public Vector(double[] vector)
@@ -49,6 +51,32 @@ namespace NumericalAnalysisLibrary
             }
         }
 
+        public double LNorm
+        {
+            get {
+                double norm = 0;
+
+                foreach (var value in elements)
+                    norm += Math.Abs(value);
+
+                return norm;
+            }
+        }
+        public double EuclideanNorm
+        {
+            get
+            {
+                double norm = 0;
+
+                foreach (var value in elements)
+                    norm += Math.Pow(value, 2);
+
+                norm = Math.Sqrt(norm);
+
+                return norm;
+            }
+        }
+
         public double MaxValue
         {
             get
@@ -74,6 +102,15 @@ namespace NumericalAnalysisLibrary
 
                 return min;
             }
+        }
+
+        public override string ToString()
+        {
+            return "{" + string.Join(", ", 
+                elements.Select(
+                    x => {
+                        return Math.Round(x, numberOfSignsAfterCommaInStringRepresentation).ToString();
+                            })) + "}";
         }
 
         public void SwapRows(int rowIndex1, int rowIndex2)
@@ -181,6 +218,15 @@ namespace NumericalAnalysisLibrary
         public static implicit operator Matrix(Vector vect)
         {
             return new Matrix(vect.elements);
+        }
+        public static implicit operator Dictionary<uint, double>(Vector vect)
+        {
+            var dict = new Dictionary<uint, double>();
+
+            for (int i = 0; i < vect.Count; i++)
+                dict.Add((uint)i, vect[i]);
+
+            return dict;
         }
     }
 }

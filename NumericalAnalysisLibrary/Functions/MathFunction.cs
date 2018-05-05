@@ -122,7 +122,7 @@ namespace NumericalAnalysisLibrary
             MathFunction f = functions[0],
                           g = functions[1];
 
-            return new PowerFunction(1.0, f, g - 1) * f.Derivative(1) * g.Derivative(1);
+            return new PowerFunction(coef, f, g - 1) * f.Derivative(1);
         }
 
         public override string ToString()
@@ -339,6 +339,102 @@ namespace NumericalAnalysisLibrary
         public override object Clone()
         {
             return new AbsFunction(coef, functions[0]);
+        }
+    }
+    public class ACosFunction: MathFunction
+    {
+        public ACosFunction(double coef, MathFunction foundation): base()
+        {
+            this.coef = coef;
+
+            functions.Add(foundation.Clone() as MathFunction);
+        }
+
+        public override double Calculate(double x)
+        {
+            return coef * Math.Acos(functions[0].Calculate(x));
+        }
+        public override MathFunction Derivative(int order)
+        {
+            if (order < 0)
+                throw new Exception("Incorrect derivative order!");
+
+            if (order == 0)
+                return this;
+
+            return (-1 / (1 + (functions[0] ^ 2)) * functions[0].Derivative(1)).Derivative(order - 1);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}ACos[{1}]", coef != 1 ? Math.Round(coef, 2).ToString() + " * " : "", functions[0].ToString());
+        }
+
+        public override bool IsZero()
+        {
+            return coef == 0 || (functions[0] - Math.PI / 2).IsZero();
+        }
+
+        protected override MathFunction MinusFunction()
+        {
+            return new ACosFunction(-coef, functions[0]);
+        }
+        protected override MathFunction Multiply(double coef)
+        {
+            return new ACosFunction(coef * this.coef, functions[0]);
+        }
+
+        public override object Clone()
+        {
+            return new ACosFunction(coef, functions[0]);
+        }
+    }
+    public class ASinFunction : MathFunction
+    {
+        public ASinFunction(double coef, MathFunction foundation) : base()
+        {
+            this.coef = coef;
+
+            functions.Add(foundation.Clone() as MathFunction);
+        }
+
+        public override double Calculate(double x)
+        {
+            return coef * Math.Asin(functions[0].Calculate(x));
+        }
+        public override MathFunction Derivative(int order)
+        {
+            if (order < 0)
+                throw new Exception("Incorrect derivative order!");
+
+            if (order == 0)
+                return this;
+
+            return (1 / (1 + (functions[0] ^ 2)) * functions[0].Derivative(1)).Derivative(order - 1);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}ASin[{1}]", coef != 1 ? Math.Round(coef, 2).ToString() + " * " : "", functions[0].ToString());
+        }
+
+        public override bool IsZero()
+        {
+            return coef == 0 || functions[0].IsZero();
+        }
+
+        protected override MathFunction MinusFunction()
+        {
+            return new ASinFunction(-coef, functions[0]);
+        }
+        protected override MathFunction Multiply(double coef)
+        {
+            return new ASinFunction(coef * this.coef, functions[0]);
+        }
+
+        public override object Clone()
+        {
+            return new ASinFunction(coef, functions[0]);
         }
     }
 

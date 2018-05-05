@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="ExtremumMethods\ExtremumType.cs" />
     <Compile Include="FunctionApproximationMethods\FunctionMethod.cs" />
     <Compile Include="FunctionApproximationMethods\LagranzFunction.cs" />
     <Compile Include="FunctionApproximationMethods\MinSquareFunction.cs" />
