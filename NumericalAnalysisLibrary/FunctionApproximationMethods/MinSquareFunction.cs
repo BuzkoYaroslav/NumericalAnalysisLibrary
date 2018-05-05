@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NumericalAnalysisLibrary.MathStructures;
+using NumericalAnalysisLibrary.SLAESolution;
 
-namespace NumericalAnalysisLibrary
+namespace NumericalAnalysisLibrary.FunctionApproximation
 {
     public class MinSquareFunction : Method, FunctionMethod
     {

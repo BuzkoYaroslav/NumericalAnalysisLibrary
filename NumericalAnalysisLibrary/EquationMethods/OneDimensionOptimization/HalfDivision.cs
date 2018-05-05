@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NumericalAnalysisLibrary.MathStructures;
+using NumericalAnalysisLibrary.Functions;
 
-namespace NumericalAnalysisLibrary
+namespace NumericalAnalysisLibrary.EquationSolution
 {
-    public class HalfDivision : GenericIteration ,EquationMethod
+    public class HalfDivision : GenericIteration, EquationMethod
     {
         public double Solve(Equation eq, double a, double b)
         {

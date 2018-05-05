@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NumericalAnalysisLibrary.Functions;
 
-namespace NumericalAnalysisLibrary
+namespace NumericalAnalysisLibrary.MathStructures
 {
     public enum InequalityType { Greater, Less, Equal}; // it is respectively to the left part (i.e. greater mean left > right)
 

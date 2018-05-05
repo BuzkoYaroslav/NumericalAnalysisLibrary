@@ -41,11 +41,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="ExtremumMethods\ExtremumMethod.cs" />
     <Compile Include="ExtremumMethods\ExtremumType.cs" />
+    <Compile Include="ExtremumMethods\FibonacciExtremum.cs" />
+    <Compile Include="ExtremumMethods\GoldenRatioExtremum.cs" />
+    <Compile Include="ExtremumMethods\HalfDivisionExtremum.cs" />
+    <Compile Include="ExtremumMethods\IExtremumSolver.cs" />
     <Compile Include="FunctionApproximationMethods\FunctionMethod.cs" />
     <Compile Include="FunctionApproximationMethods\LagranzFunction.cs" />
     <Compile Include="FunctionApproximationMethods\MinSquareFunction.cs" />
     <Compile Include="FunctionApproximationMethods\NewtonFunction.cs" />
+    <Compile Include="GradientMethods\AdaptiveGradientMethod.cs" />
+    <Compile Include="GradientMethods\GradientMethod.cs" />
+    <Compile Include="GradientMethods\IGradientMethod.cs" />
     <Compile Include="MathStructures\Inequality.cs" />
     <Compile Include="SystemMethods\HoleckiiMethod.cs" />
     <Compile Include="MathStructures\Equation.cs" />

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using NumericalAnalysisLibrary.Functions;
+using NumericalAnalysisLibrary.MathStructures;
+using NumericalAnalysisLibrary.SLAESolution;
 
-namespace NumericalAnalysisLibrary
+namespace NumericalAnalysisLibrary.BoundaryValueProblem
 {
     public class CollocationMethod : BoundaryValueTaskSolver
     {

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NumericalAnalysisLibrary.MathStructures;
 
-namespace NumericalAnalysisLibrary
+namespace NumericalAnalysisLibrary.Functions
 {
     public enum MathFunctionType { Sum, Multiplication, Division }
 

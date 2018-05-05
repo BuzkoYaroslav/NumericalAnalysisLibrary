@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NumericalAnalysisLibrary.MathStructures;
+using NumericalAnalysisLibrary.Functions;
 
-namespace NumericalAnalysisLibrary
+namespace NumericalAnalysisLibrary.EquationSolution
 {
     public class ChordMethod : GenericIteration, EquationMethod
     {

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NumericalAnalysisLibrary.Functions;
+using NumericalAnalysisLibrary.EquationSolution;
+using NumericalAnalysisLibrary.MathStructures;
 
-namespace NumericalAnalysisLibrary
+namespace NumericalAnalysisLibrary.IntegralApproximation
 {
     public class GaussIntegralMethod : IntegralMethod
     {
