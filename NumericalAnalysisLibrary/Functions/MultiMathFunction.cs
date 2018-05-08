@@ -288,9 +288,35 @@ namespace NumericalAnalysisLibrary.Functions
 
             return matrix;
         }
-        
+
         #region Transform to MathFunction type
 
+        public virtual MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            List<MathFunction> simpleFunctions = new List<MathFunction>();
+
+            foreach (var func in functions)
+                simpleFunctions.Add(func.TransformToSimpleFunction(transform));
+
+            MathFunctionType sType;
+            switch (type)
+            {
+                case MultiMathFunctionType.Addition:
+                    sType = MathFunctionType.Sum;
+                    break;
+                case MultiMathFunctionType.Division:
+                    sType = MathFunctionType.Division;
+                    break;
+                case MultiMathFunctionType.Multiplication:
+                    sType = MathFunctionType.Multiplication;
+                    break;
+                default:
+                    sType = MathFunctionType.Sum;
+                    break;
+            }
+
+            return new MathFunction(coef, sType, simpleFunctions.ToArray());
+        }
         public virtual MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
             if (functions == null || functions.Count == 0)
@@ -580,12 +606,15 @@ namespace NumericalAnalysisLibrary.Functions
     {
         private uint index;
 
+        // Constructors
         public ArgumentFunction(double coef, uint index)
         {
             this.coef = coef;
             this.index = index;
             type = MultiMathFunctionType.Special;
         }
+
+        // IClonable implementing
         public override object Clone()
         {
             return new ArgumentFunction(coef, index);
@@ -600,6 +629,7 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return coef == 0;
         }
+
         public override MultiMathFunction Derivative(int order, int index)
         {
             if (order == 0)
@@ -613,6 +643,7 @@ namespace NumericalAnalysisLibrary.Functions
 
             return 0;
         }
+
         public override void GetAllVariables(ref HashSet<int> vars)
         {
             vars.Add((int)index);
@@ -622,6 +653,9 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return coef * x[index];
         }
+
+        #region Transform to simple function
+
         public override MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
             if (variables.ContainsKey(index))
@@ -630,6 +664,12 @@ namespace NumericalAnalysisLibrary.Functions
                 return new XFunction(coef);
 
         }
+        public override MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            return coef * transform[index];
+        }
+
+        #endregion
 
         public override MultiMathFunction[] GetFunctionForVariable(List<MultiMathFunction> right, int index)
         {
@@ -661,6 +701,7 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return (foundation - Math.PI / 2).IsZero();
         }
+
         public override MultiMathFunction Derivative(int order, int index)
         {
             if (order == 0)
@@ -678,10 +719,17 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return coef * Math.Cos(foundation.Calculate(x));
         }
+
+        #region Transform to simple function
         public override MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
             return new CosFunction(coef, foundation.TransformToSimpleFunction(variables));
         }
+        public override MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            return new CosFunction(coef, foundation.TransformToSimpleFunction(transform));
+        }
+        #endregion
 
         public override MultiMathFunction[] GetFunctionForVariable(List<MultiMathFunction> right, int index)
         {
@@ -725,6 +773,7 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return foundation.IsZero();
         }
+
         public override MultiMathFunction Derivative(int order, int index)
         {
             if (order == 0)
@@ -742,9 +791,14 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return coef * Math.Sin(foundation.Calculate(x));
         }
+
         public override MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
             return new SinFunction(coef, foundation.TransformToSimpleFunction(variables));
+        }
+        public override MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            return new SinFunction(coef, foundation.TransformToSimpleFunction(transform));
         }
 
         public override MultiMathFunction[] GetFunctionForVariable(List<MultiMathFunction> right, int index)
@@ -806,9 +860,14 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return coef * Math.Log(foundation.Calculate(x));
         }
+
         public override MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
             return new LnFunction(coef, foundation.TransformToSimpleFunction(variables));
+        }
+        public override MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            return new LnFunction(coef, foundation.TransformToSimpleFunction(transform));
         }
 
         public override MultiMathFunction[] GetFunctionForVariable(List<MultiMathFunction> right, int index)
@@ -848,6 +907,7 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return coef == 0;
         }
+
         public override MultiMathFunction Derivative(int order, int index)
         {
             if (order == 0)
@@ -871,6 +931,7 @@ namespace NumericalAnalysisLibrary.Functions
                 return (new PowerMultiFunction(coef, foundation, power + -1) * fDer * power).Derivative(order - 1, index);
             }
         }
+
         public override void GetAllVariables(ref HashSet<int> vars)
         {
             foundation.GetAllVariables(ref vars);
@@ -881,12 +942,20 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return coef * Math.Pow(foundation.Calculate(x), power.Calculate(x));
         }
+
         public override MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
             if (foundation is ConstMultiFunction)
                 return new StepFunction(coef, foundation.TransformToSimpleFunction(variables), power.TransformToSimpleFunction(variables));
             else 
                 return new PowerFunction(coef, foundation.TransformToSimpleFunction(variables), power.TransformToSimpleFunction(variables));
+        }
+        public override MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            if (foundation is ConstMultiFunction)
+                return new StepFunction(coef, foundation.TransformToSimpleFunction(transform), power.TransformToSimpleFunction(transform));
+            else
+                return new PowerFunction(coef, foundation.TransformToSimpleFunction(transform), power.TransformToSimpleFunction(transform));
         }
 
         public override MultiMathFunction[] GetFunctionForVariable(List<MultiMathFunction> right, int index)
@@ -972,11 +1041,16 @@ namespace NumericalAnalysisLibrary.Functions
         {
             return coef;
         }
+
         public override MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
             return new ConstFunction(coef);
         }
-        
+        public override MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            return coef;
+        }
+
         public static explicit operator double(ConstMultiFunction f)
         {
             return f.coef;
@@ -992,7 +1066,6 @@ namespace NumericalAnalysisLibrary.Functions
             throw new Exception(); // Left part does not contain variable index
         }
     }
-
     public class ACosMultiFunction : FoundationFunction
     {
         public ACosMultiFunction(double coef, MultiMathFunction foundation) : base(coef, foundation)
@@ -1006,7 +1079,11 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
-            return base.TransformToSimpleFunction(variables);
+            return new ACosFunction(coef, foundation.TransformToSimpleFunction(variables));
+        }
+        public override MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            return new ACosFunction(coef, foundation.TransformToSimpleFunction(transform));
         }
 
         public override bool IsZero()
@@ -1038,7 +1115,6 @@ namespace NumericalAnalysisLibrary.Functions
             throw new NotImplementedException();
         }
     }
-
     public class ASinMultiFunction : FoundationFunction
     {
         public ASinMultiFunction(double coef, MultiMathFunction foundation) : base(coef, foundation)
@@ -1062,7 +1138,11 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override MathFunction TransformToSimpleFunction(Dictionary<uint, double> variables)
         {
-            return base.TransformToSimpleFunction(variables);
+            return new ASinFunction(coef, foundation.TransformToSimpleFunction(variables));
+        }
+        public override MathFunction TransformToSimpleFunction(Dictionary<uint, MathFunction> transform)
+        {
+            return new ASinFunction(coef, foundation.TransformToSimpleFunction(transform));
         }
 
         public override string ToString()

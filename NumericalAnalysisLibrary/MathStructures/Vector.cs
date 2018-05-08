@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NumericalAnalysisLibrary.Functions;
 
 namespace NumericalAnalysisLibrary.MathStructures
 {
-    public class Vector
+    public class Vector : ICloneable
     {
         private const int numberOfSignsAfterCommaInStringRepresentation = 4;
 
@@ -110,6 +111,11 @@ namespace NumericalAnalysisLibrary.MathStructures
                         return Math.Round(x, numberOfSignsAfterCommaInStringRepresentation).ToString();
                             })) + "}";
         }
+        public object Clone()
+        {
+            return new Vector(elements);
+        }
+        
 
         public void SwapRows(int rowIndex1, int rowIndex2)
         {
@@ -225,6 +231,45 @@ namespace NumericalAnalysisLibrary.MathStructures
                 dict.Add((uint)i, vect[i]);
 
             return dict;
+        }
+        public static double operator *(Vector left, Vector right)
+        {
+            if (left.Count != right.Count)
+                throw new InvalidOperationException(); 
+
+            double res = 0;
+
+            for (int i = 0; i < left.Count; i++)
+                res += left[i] * right[i];
+
+            return res;
+        }
+
+        public static MathFunction[] operator *(Vector coefs, MathFunction func)
+        {
+            MathFunction[] res = new MathFunction[coefs.Count];
+
+            for (int i = 0; i < res.Length; i++)
+                res[i] = coefs[i] * func;
+
+            return res;
+        }
+        public static MathFunction[] operator *(MathFunction func, Vector coefs)
+        {
+            return coefs * func;
+        }
+        public static MathFunction[] operator +(Vector coefs, MathFunction[] funcs)
+        {
+            MathFunction[] res = new MathFunction[coefs.Count];
+
+            for (int i = 0; i < res.Length; i++)
+                res[i] = funcs[i] + coefs[i];
+
+            return res;
+        }
+        public static MathFunction[] operator +(MathFunction[] funcs, Vector coefs)
+        {
+            return coefs + funcs;
         }
     }
 }

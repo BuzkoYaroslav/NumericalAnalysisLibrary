@@ -1,14 +1,14 @@
 ﻿using NumericalAnalysisLibrary.Functions;
 using NumericalAnalysisLibrary.MathStructures;
 
-namespace NumericalAnalysisLibrary.ExtremumSearch.GradientMethods
+namespace NumericalAnalysisLibrary.ExtremumSearch
 {
-    public abstract class GradientMethod : IGradientMethod
+    public abstract class NoConditionExtremumMethod : INoConditionExtremumMethod
     {
-        private string tableFormat = "{0,5}{1,20}{2,10:F4}{3,20}{4,10:F4}{5,10:F4}{6,20}\n";
+        protected string tableFormat = "{0,5}{1,20}{2,10:F4}{3,20}{4,10:F4}{5,10:F4}{6,20}\n";
         private double epsilon;
 
-        public GradientMethod()
+        public NoConditionExtremumMethod()
         {
             epsilon = 0.00001;
         }
@@ -19,18 +19,18 @@ namespace NumericalAnalysisLibrary.ExtremumSearch.GradientMethods
             set { epsilon = value; }
         }
 
-        public Vector[] FindExtremum(MultiMathFunction func, ExtremumType type, string debugInfoFile = null)
+        public Vector[] FindExtremum(MultiMathFunction func, ExtremumType type, Vector startPoint, string debugInfoFile = null)
         {
             if (debugInfoFile != null)
-                return FindExtremumWithInfo(func, type, debugInfoFile);
+                return FindExtremumWithInfo(func, type, startPoint, debugInfoFile);
             else
-                return FindExtremum(func, type);
+                return FindExtremum(func, type, startPoint);
         }
 
-        protected abstract Vector[] FindExtremum(MultiMathFunction func, ExtremumType type);
-        protected abstract Vector[] FindExtremumWithInfo(MultiMathFunction func, ExtremumType type, string debugInfoFile);
+        protected abstract Vector[] FindExtremum(MultiMathFunction func, ExtremumType type, Vector startPoint);
+        protected abstract Vector[] FindExtremumWithInfo(MultiMathFunction func, ExtremumType type, Vector startPoint, string debugInfoFile);
 
-        protected string GapForTable(MultiMathFunction func, ExtremumType type)
+        protected virtual string GapForTable(MultiMathFunction func, ExtremumType type)
         {
             string result = string.Format("Function info:\nF(X) = {0}\nMethod Info:\n{1}\nTask: F(X) -> {2}\n", 
                 func, this, type == ExtremumType.Minimum ? "min" : "max");
@@ -40,7 +40,7 @@ namespace NumericalAnalysisLibrary.ExtremumSearch.GradientMethods
 
             return result;
         }
-        protected string RowForIteration(params object[] args)
+        protected virtual string RowForIteration(params object[] args)
         {
             return string.Format(tableFormat,
                 (int)args[0],

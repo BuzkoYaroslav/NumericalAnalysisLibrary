@@ -7,27 +7,20 @@ using NumericalAnalysisLibrary.MathStructures;
 
 namespace NumericalAnalysisLibrary.ExtremumSearch.GradientMethods
 {
-    public class AdaptiveGradientMethod : GradientMethod
+    public class AdaptiveGradientMethod : NoConditionExtremumMethod
     {
         private double alpha;
         private double lambda;
         private int varsNumber;
-        private Vector startPoint;
 
-        public AdaptiveGradientMethod(double alpha, double lambda, double epsilon, int varsNumber, Vector startPoint): base()
+        public AdaptiveGradientMethod(double alpha, double lambda, double epsilon, int varsNumber): base()
         {
             Epsilon = epsilon;
             Alpha = alpha;
             Lambda = lambda;
             VariablesCount = varsNumber;
-            StartPoint = startPoint;
         }
-        
-        public Vector StartPoint
-        {
-            set { startPoint = value; }
-            get { return startPoint; }
-        }
+
         public double Alpha
         {
             set { alpha = value; }
@@ -50,12 +43,12 @@ namespace NumericalAnalysisLibrary.ExtremumSearch.GradientMethods
                 Alpha, Lambda);
         }
 
-        protected override Vector[] FindExtremum(MultiMathFunction func, ExtremumType type)
+        protected override Vector[] FindExtremum(MultiMathFunction func, ExtremumType type, Vector startPoint)
         {
             int multiplier = type == ExtremumType.Maximum ? -1 : 1;
             var seq = new List<Vector>();
 
-            Vector xCurrent = StartPoint,
+            Vector xCurrent = startPoint,
                 xPrev;
             MultiMathFunction[] derivatives = func.DerivativeVector();
 
@@ -76,7 +69,7 @@ namespace NumericalAnalysisLibrary.ExtremumSearch.GradientMethods
             return seq.ToArray();
         }
 
-        protected override Vector[] FindExtremumWithInfo(MultiMathFunction func, ExtremumType type, string debugInfoFile)
+        protected override Vector[] FindExtremumWithInfo(MultiMathFunction func, ExtremumType type, Vector startPoint, string debugInfoFile)
         {
             StreamWriter writer = new StreamWriter(debugInfoFile);
             int multiplier = type == ExtremumType.Maximum ? -1 : 1;
@@ -84,7 +77,7 @@ namespace NumericalAnalysisLibrary.ExtremumSearch.GradientMethods
 
             writer.Write(GapForTable(func, type));
 
-            Vector xCurrent = StartPoint,
+            Vector xCurrent = startPoint,
                 xPrev;
             MultiMathFunction[] derivatives = func.DerivativeVector();
 
