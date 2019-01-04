@@ -4,8 +4,10 @@ using NumericalAnalysisLibrary.MathStructures;
 
 namespace NumericalAnalysisLibrary.Functions
 {
+    [Serializable]
     public enum MathFunctionType { Sum, Multiplication, Division }
 
+    [Serializable]
     public class CosFunction: MathFunction
     {
         public CosFunction(double coef, MathFunction foundation): base()
@@ -32,7 +34,10 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override string ToString()
         {
-            return string.Format("{0}cos[{1}]", coef != 1 ? Math.Round(coef, 2).ToString() + " * " : "", functions[0].ToString());
+            string c = "";
+            if (coef != 1)
+                c = string.Format("{0:E} * (", coef);
+            return string.Format("{0}cos[{1}]", c, functions[0].ToString());
         }
 
         public override bool IsZero()
@@ -54,6 +59,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new CosFunction(coef, functions[0]);
         }
     }
+    [Serializable]
     public class SinFunction: MathFunction
     {
         public SinFunction(double coef, MathFunction foundation): base()
@@ -80,7 +86,10 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override string ToString()
         {
-            return string.Format("{0}sin[{1}]", coef != 1 ? Math.Round(coef, 2).ToString() + " * " : "", functions[0].ToString());
+            string c = "";
+            if (coef != 1)
+                c = string.Format("{0:E} * (", coef);
+            return string.Format("{0}sin[{1}]", c, functions[0].ToString());
         }
 
         public override bool IsZero()
@@ -102,6 +111,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new SinFunction(coef, functions[0]);
         }
     }
+    [Serializable]
     public class PowerFunction: MathFunction
     {
         public PowerFunction(double coef, MathFunction foundation, MathFunction power): base()
@@ -125,7 +135,10 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override string ToString()
         {
-            return string.Format("{0}({1}) ^ [{2}]", coef != 1 ? Math.Round(coef, 2).ToString() + " * " : "", functions[0], functions[1]);
+            string c = "";
+            if (coef != 1)
+                c = string.Format("{0:E} * (", coef);
+            return string.Format("{0}({1}) ^ [{2}]", c, functions[0], functions[1]);
         }
 
         public override bool IsZero()
@@ -147,6 +160,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new PowerFunction(coef, functions[0], functions[1]);
         }
     }
+    [Serializable]
     public class StepFunction : PowerFunction
     {
         public StepFunction(double coef, MathFunction foundation, MathFunction power): base(coef, foundation, power)
@@ -167,6 +181,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new StepFunction(coef, functions[0], functions[1]);
         }
     }
+    [Serializable]
     public class LnFunction: MathFunction
     {
         public LnFunction(double coef, MathFunction foundation): base()
@@ -193,7 +208,10 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override string ToString()
         {
-            return string.Format("{0}ln[{1}]", coef != 1 ? Math.Round(coef, 2).ToString() + " * " : "", functions[0].ToString());
+            string c = "";
+            if (coef != 1)
+                c = string.Format("{0:E} * (", coef);
+            return string.Format("{0}ln[{1}]", c, functions[0].ToString());
         }
 
         public override bool IsZero()
@@ -214,6 +232,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new LnFunction(coef, functions[0]);
         }
     }
+    [Serializable]
     public class ConstFunction: MathFunction
     {
         public ConstFunction(double coef): base()
@@ -235,7 +254,7 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override string ToString()
         {
-            return Math.Round(coef, 2).ToString();
+            return string.Format("{0:E}", coef);
         }
 
         public override bool IsZero()
@@ -256,6 +275,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new ConstFunction(coef);
         }
     }
+    [Serializable]
     public class XFunction: MathFunction
     {
         public XFunction(double coef): base()
@@ -277,7 +297,10 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override string ToString()
         {
-            return string.Format("{0}x", coef != 1 ? Math.Round(coef, 2).ToString() + " * " : "");
+            string c = "";
+            if (coef != 1)
+                c = string.Format("{0:E} * (", coef);
+            return string.Format("{0}x", c);
         }
 
         public override bool IsZero()
@@ -299,6 +322,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new XFunction(coef);
         }
     }
+    [Serializable]
     public class AbsFunction: MathFunction
     {
         public AbsFunction(double coef, MathFunction foundation)
@@ -321,7 +345,10 @@ namespace NumericalAnalysisLibrary.Functions
 
         public override string ToString()
         {
-            return string.Format("|{0}|", functions[0].ToString());
+            string c = "";
+            if (coef != 1)
+                c = string.Format("{0:E} * (", coef);
+            return string.Format("{0}|{1}|", c, functions[0]);
         }
 
         public override bool IsZero()
@@ -339,6 +366,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new AbsFunction(coef, functions[0]);
         }
     }
+    [Serializable]
     public class ACosFunction: MathFunction
     {
         public ACosFunction(double coef, MathFunction foundation): base()
@@ -387,6 +415,7 @@ namespace NumericalAnalysisLibrary.Functions
             return new ACosFunction(coef, functions[0]);
         }
     }
+    [Serializable]
     public class ASinFunction : MathFunction
     {
         public ASinFunction(double coef, MathFunction foundation) : base()
@@ -436,6 +465,7 @@ namespace NumericalAnalysisLibrary.Functions
         }
     }
 
+    [Serializable]
     public class MathFunction: ICloneable
     {
         private delegate bool Condition(double f, double best);
@@ -697,7 +727,12 @@ namespace NumericalAnalysisLibrary.Functions
         }
         public override string ToString()
         {
-            string result = coef != 1 ? Math.Round(coef, 2) + " * (" : "(";
+            string result;
+            if (coef != 1)
+                result = string.Format("{0:E} * (", coef);
+            else
+                result = "(";
+
             string splitter = type == MathFunctionType.Sum ? " + " : type == MathFunctionType.Multiplication ? " * " : " : ";
 
             for (int i = 0; i < functions.Count; i++)

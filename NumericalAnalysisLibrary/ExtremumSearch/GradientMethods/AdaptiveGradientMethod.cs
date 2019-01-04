@@ -109,13 +109,13 @@ namespace NumericalAnalysisLibrary.ExtremumSearch.GradientMethods
             double multiplier = type == ExtremumType.Maximum ? -1 : 1;
 
             int i = 0;
-            Vector dValue = ((double[])x).Select(_ => { return derivative[i++].Calculate(x); }).ToArray();
+            Vector dValue = ((double[])x).Select(_ => { return multiplier * derivative[i++].Calculate(x); }).ToArray();
 
             double fValue;
 
             do
             {
-                var xNew = x - multiplier * alpha * dValue;
+                var xNew = x - alpha * dValue;
                 fValue = func.Calculate(xNew) - func.Calculate(x);
 
                 if (multiplier * fValue <= -Epsilon * alpha * Math.Pow(dValue.EuclideanNorm, 2))

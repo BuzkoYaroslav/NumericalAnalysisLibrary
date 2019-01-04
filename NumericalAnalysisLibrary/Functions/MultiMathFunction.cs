@@ -1,10 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace NumericalAnalysisLibrary.Functions
 {
-    public enum MultiMathFunctionType { Addition = 0, Multiplication, Division, Special };
+    public enum MultiMathFunctionType {
+
+        [Description("+")]
+        Addition = 0,
+        [Description("*")]
+        Multiplication,
+        [Description("/")]
+        Division,
+        [Description("^")]
+        Special
+
+    };
+
+    public static class MultiMathFunctionTypeExtension
+    {
+        public static string ToDescriptionString(this MultiMathFunctionType en)
+        {
+            DescriptionAttribute[] attributes = (DescriptionAttribute[])en.GetType().GetField(en.ToString()).GetCustomAttributes(typeof(DescriptionAttribute), false);
+            return attributes.Length > 0 ? attributes[0].Description : string.Empty;
+        }
+    }
+    public static class MultiMathFunctionTypeFactory
+    {
+        public static MultiMathFunctionType Populate(string desc)
+        {
+            if (desc == MultiMathFunctionType.Addition.ToDescriptionString())
+                return MultiMathFunctionType.Addition;
+            else if (desc == MultiMathFunctionType.Multiplication.ToDescriptionString())
+                return MultiMathFunctionType.Multiplication;
+            else if (desc == MultiMathFunctionType.Division.ToDescriptionString())
+                return MultiMathFunctionType.Division;
+            else
+                return MultiMathFunctionType.Special;
+        }
+    }
 
     public class MultiMathFunction: ICloneable
     {
@@ -14,6 +49,18 @@ namespace NumericalAnalysisLibrary.Functions
         protected double coef;
         protected List<MultiMathFunction> functions;
         protected MultiMathFunctionType type;     
+
+        public int NumberOfVariables
+        {
+            get
+            {
+                var set = new HashSet<int>();
+
+                GetAllVariables(ref set);
+
+                return set.Count;
+            }
+        }
 
         #region Initialization
 
@@ -111,6 +158,277 @@ namespace NumericalAnalysisLibrary.Functions
             return new MultiMathFunction(coef, type, functions.ToArray());
         }
         #endregion
+
+        #region MultiMathFunction sequence representation
+
+        private delegate MultiMathFunction BinaryOperator(MultiMathFunction f, MultiMathFunction g);
+        private static Tuple<char, BinaryOperator>[] binaryOperators = new Tuple<char, BinaryOperator>[]
+        {
+            new Tuple<char, BinaryOperator>('*', (x, y) => x * y),
+            new Tuple<char, BinaryOperator>('/', (x, y) => x / y),
+            new Tuple<char, BinaryOperator>('^', (x, y) => x ^ y),
+            new Tuple<char, BinaryOperator>('+', (x, y) => x + y)
+        };
+
+        private class MultiMathFunctionSequence
+        {
+            private SequenceNode first;
+            private SequenceNode last;
+
+            public MultiMathFunctionSequence(MultiMathFunction func)
+            {
+                first = new SequenceNode();
+                first.value = func;
+
+                last = first;
+            } 
+
+            public void AddFunction(MultiMathFunction newF, MultiMathFunctionType opType)
+            {
+                var newSN = new SequenceNode();
+
+                newSN.value = newF;
+                newSN.prev = last;
+                newSN.prevOperation = opType;
+                last.next = newSN;
+                last.nextOperation = opType;
+
+                last = newSN;
+            }
+
+            public MultiMathFunction EvaluateSequence()
+            {
+                foreach (var op in binaryOperators)
+                {
+                    SequenceNode node;
+                    var operation = MultiMathFunctionTypeFactory.Populate(op.Item1.ToString());
+
+                    while ((node = FindNode(operation)) != null)
+                    {
+                        var newNode = new SequenceNode();
+
+                        newNode.value = op.Item2(node.value, node.next.value);
+                        newNode.prev = node.prev;
+                        newNode.prevOperation = node.prevOperation;
+
+                        if (node.prev != null)
+                            node.prev.next = newNode;
+                        else
+                            first = newNode;
+
+                        newNode.next = node.next.next;
+                        newNode.nextOperation = node.next.nextOperation;
+
+                        if (node.next.next != null)
+                            node.next.next.prev = newNode;
+                        else
+                            last = newNode;
+                    }
+                }
+
+                return first.value;
+            }
+
+            // seaching function that is connected with the next by the opType operation
+            private SequenceNode FindNode(MultiMathFunctionType opType)
+            {
+                for (var current = first; current.next != null; current = current.next)
+                {
+                    if (current.nextOperation == opType)
+                        return current;
+                }
+
+                return null;
+            }
+        }
+        private class SequenceNode
+        {
+            public MultiMathFunction value;
+            public SequenceNode next;
+            public SequenceNode prev;
+
+            public MultiMathFunctionType? nextOperation;
+            public MultiMathFunctionType? prevOperation;
+        }
+
+        #endregion
+
+        #region Parsing from string
+        private static Tuple<char, char>[] braces = new Tuple<char, char>[]
+            {
+                new Tuple<char, char>('(', ')')
+            };
+
+        private delegate MultiMathFunction CreateSpecialFunction(params object[] args);
+        private static Dictionary<string, CreateSpecialFunction> specialFunctions = new Dictionary<string, CreateSpecialFunction>()
+        {
+            {"sin", (args) => {
+                return new SinMultiFunction(args[0] as double? ?? 1.0, args[1] as MultiMathFunction);
+                } },
+            {"cos", (args) => {
+                return new CosMultiFunction(args[0] as double? ?? 1.0, args[1] as MultiMathFunction);
+                } },
+            {"ln", (args) => {
+                return new LnMultiFunction(args[0] as double? ?? 1.0, args[1] as MultiMathFunction);
+                }},
+            {"asin",(args) => {
+                return new ASinMultiFunction(args[0] as double? ?? 1.0, args[1] as MultiMathFunction);
+                }},
+            {"acos",(args) => {
+                return new ACosMultiFunction(args[0] as double? ?? 1.0, args[1] as MultiMathFunction);
+                }},
+            {"x", (args) => {
+                return new ArgumentFunction(args[0] as double? ?? 1.0, args[1] as uint? ?? 0);
+                }}
+        };
+
+        // example - "0.5 * cos[x] + sin[x] * cos[x] ^ (2 * 3)"
+        public static MultiMathFunction Parse(string function)
+        {
+            // checking function string format
+            if (!HasRightFormat(function))
+                throw new FormatException("String has incorrect format! Check braces!");
+
+            PerformPartization(ref function);
+
+            return UnsafeParse(function);
+        }
+
+        private static MultiMathFunction UnsafeParse(string function)
+        {
+            // checking if passed string is just number
+            double num;
+            if (double.TryParse(function, out num))
+                return num;
+
+            var keys = specialFunctions.Keys;
+            var indexes = specialFunctions.Keys.Select(x => new Tuple<string, int>(x, function.IndexOf(x))).ToList();
+            var start = indexes.Find(new Predicate<Tuple<string, int>>(x => x.Item2 == 0));
+
+            if (start != null && start.Item1 == "x")
+            {
+                return specialFunctions[start.Item1](1.0, uint.Parse(function.Substring(start.Item1.Length)));
+            } else if (start != null) {
+                return specialFunctions[start.Item1](1.0, UnsafeParse(function.Substring(start.Item1.Length + 1, function.Length - start.Item1.Length - 2)));
+            }
+
+            MultiMathFunctionSequence seq = null;
+            Tuple<int, int> bracesIndexes = new Tuple<int, int>(-1, -1);
+            while ((bracesIndexes = BracesPositions(function, braces.First(), bracesIndexes.Item2 + 1)) != null) {
+                if (seq == null)
+                {
+                    seq = new MultiMathFunctionSequence(UnsafeParse(function.Substring(
+                        bracesIndexes.Item1 + 1,
+                        bracesIndexes.Item2 - bracesIndexes.Item1 - 1)));
+                    continue;
+                }
+
+                seq.AddFunction(
+                    UnsafeParse(function.Substring(
+                        bracesIndexes.Item1 + 1,
+                        bracesIndexes.Item2 - bracesIndexes.Item1 - 1)), 
+                    MultiMathFunctionTypeFactory.Populate(function[bracesIndexes.Item1 - 1].ToString()));
+            }
+
+            return seq.EvaluateSequence();
+        }
+        
+        private static bool HasRightFormat(string function)
+        {
+            // if string is emtpy - format is incorrect
+            if (function == null)
+                return false; 
+
+            // extracting closing and opening characters
+            var closing = braces.Select(x => x.Item2).ToArray();
+            var opening = braces.Select(x => x.Item1).ToArray();
+
+            int openIndex = function.IndexOfAny(opening);
+
+            // if there is no opening brace and there is closing - format is incorrect
+            // otherwise format is correct
+            if (openIndex == -1)
+                return function.IndexOfAny(closing) == -1;
+
+            char close = braces.First(x => function[openIndex] == x.Item1).Item2;
+
+            int closeIndex = function.IndexOf(close);
+
+            // if closing brace stays in the string earlier than opening
+            // or there is no closing brace
+            if (closeIndex < openIndex)
+                return false;
+            
+            // checking format in the braces
+            bool innerFormat = HasRightFormat(function.Substring(openIndex + 1, closeIndex - openIndex - 1));
+            // check format of function after closing brace
+            bool trailFormat = closeIndex == function.Length - 1 ? true :
+                HasRightFormat(function.Substring(closeIndex + 1));
+
+            return innerFormat && trailFormat;
+        }
+        private static void PerformPartization(ref string function)
+        {
+            var defaultOpenBrace = braces.First().Item1;
+            var defaultCloseBrace = braces.First().Item2;
+
+            function = function.Replace("-", string.Format("+{0}-1{1}*", defaultOpenBrace, defaultCloseBrace));
+            function.TrimStart('+');
+
+            foreach (var special in specialFunctions.Keys)
+            {
+                if (special == "x")
+                    continue;
+
+                int pos = 0;
+
+                while ((pos = function.IndexOf(special, pos)) != -1)
+                {
+                    var br = BracesPositions(function, braces.First(), pos);
+
+                    function = function.Insert(br.Item1, defaultOpenBrace.ToString());
+                    function = function.Insert(br.Item2 + 1, defaultCloseBrace.ToString());
+
+                    pos = br.Item2 + 2;
+                }
+            }
+
+            function = function.Insert(0, defaultOpenBrace.ToString());
+            function = function.Insert(function.Length, defaultCloseBrace.ToString());
+
+            foreach (var op in binaryOperators)
+                function = function.Replace(op.Item1.ToString(), string.Format("{2}{0}{1}", op.Item1, defaultOpenBrace, defaultCloseBrace));
+
+
+            function = function.Replace(" ", "");
+        }
+        private static Tuple<int, int> BracesPositions(string function, Tuple<char, char> braces, int startIndex)
+        {
+            int opening = function.IndexOf(braces.Item1, startIndex);
+
+            if (opening == -1)
+                return null;
+
+            int opCount = 0,
+                clCount = 0;
+
+            int closing = function.Substring(opening).ToList().FindIndex(
+                new Predicate<char>(x =>
+                {
+                    if (x == braces.Item1)
+                        opCount++;
+                    else if (x == braces.Item2)
+                        clCount++;
+
+                    return opCount == clCount;
+                })
+            ) + opening;
+
+            return new Tuple<int, int>(opening, closing);
+        }
+
+        #endregion
+
 
         public override string ToString()
         {
@@ -256,6 +574,7 @@ namespace NumericalAnalysisLibrary.Functions
             foreach (var f in functions)
                 f.GetAllVariables(ref vars);
         }
+
         public MultiMathFunction[] DerivativeVector()
         {
             HashSet<int> vars = new HashSet<int>();
@@ -506,6 +825,7 @@ namespace NumericalAnalysisLibrary.Functions
                     MultiMathFunction up = functions[0],
                         low = functions[1];
 
+                    vars.Clear();
                     up.GetAllVariables(ref vars);
 
                     if (vars.Contains(index))
@@ -590,15 +910,27 @@ namespace NumericalAnalysisLibrary.Functions
     {
         protected MultiMathFunction foundation;
 
-        public FoundationFunction(double coef, MultiMathFunction foundation)
+        public FoundationFunction() : base()
+        {
+            this.type = MultiMathFunctionType.Special;
+        }
+        public FoundationFunction(double coef, MultiMathFunction foundation) : this()
         {
             this.coef = coef;
             this.foundation = foundation.Clone() as MultiMathFunction;
-            this.type = MultiMathFunctionType.Special;
         }
         public override void GetAllVariables(ref HashSet<int> vars)
         {
             foundation.GetAllVariables(ref vars);
+        }
+
+        public void SetFoundation(MultiMathFunction f)
+        {
+            foundation = f.Clone() as MultiMathFunction;
+        }
+        public void SetCoef(double coef)
+        {
+            this.coef = coef;
         }
     }
 
@@ -683,6 +1015,8 @@ namespace NumericalAnalysisLibrary.Functions
     } 
     public class CosMultiFunction : FoundationFunction
     {
+        public CosMultiFunction() : base() { }
+
         public CosMultiFunction(double coef, MultiMathFunction foundation) : base(coef, foundation)
         {
         }
@@ -755,6 +1089,8 @@ namespace NumericalAnalysisLibrary.Functions
     }
     public class SinMultiFunction : FoundationFunction
     {
+        public SinMultiFunction() : base() { }
+
         public SinMultiFunction(double coef, MultiMathFunction foundation) : base(coef, foundation)
         {
         }
@@ -824,6 +1160,8 @@ namespace NumericalAnalysisLibrary.Functions
     }
     public class LnMultiFunction : FoundationFunction
     {
+        public LnMultiFunction() : base() { }
+
         public LnMultiFunction(double coef, MultiMathFunction foundation) : base(coef, foundation)
         {
         }
@@ -964,10 +1302,13 @@ namespace NumericalAnalysisLibrary.Functions
 
             HashSet<int> vars = new HashSet<int>();
             UpdateFunc func = null;
+            MultiMathFunction left = null;
 
             foundation.GetAllVariables(ref vars);
             if (vars.Contains(index) && (power is ConstMultiFunction && (power as ConstMultiFunction).IsEven()))
             {
+                left = foundation;
+
                 func = x => {
                     return new MultiMathFunction[] {
                     new PowerMultiFunction(1.0, x, 1 / power),
@@ -976,6 +1317,8 @@ namespace NumericalAnalysisLibrary.Functions
             }
             else if (vars.Contains(index))
             {
+                left = foundation;
+
                 func = x => {
                     return new MultiMathFunction[] {
                     new PowerMultiFunction(1.0, x, 1 / power) };
@@ -989,7 +1332,7 @@ namespace NumericalAnalysisLibrary.Functions
                 if (func != null)
                     throw new Exception(); // Unable to solve for variable index
 
-                var number = (double)(power as ConstMultiFunction);
+                var number = (double)(foundation as ConstMultiFunction);
 
                 func = x =>
                 {
@@ -998,12 +1341,14 @@ namespace NumericalAnalysisLibrary.Functions
                         new LnMultiFunction(1.0 / Math.Log(number), x)
                     };
                 };
+
+                left = power;
             }
         
 
             UpdateRightPart(ref right, func);
 
-            return foundation.GetFunctionForVariable(right, index);
+            return left.GetFunctionForVariable(right, index);
         }
     }
     public class ConstMultiFunction : MultiMathFunction
@@ -1068,6 +1413,8 @@ namespace NumericalAnalysisLibrary.Functions
     }
     public class ACosMultiFunction : FoundationFunction
     {
+        public ACosMultiFunction() : base() { }
+
         public ACosMultiFunction(double coef, MultiMathFunction foundation) : base(coef, foundation)
         {
         }
@@ -1117,6 +1464,8 @@ namespace NumericalAnalysisLibrary.Functions
     }
     public class ASinMultiFunction : FoundationFunction
     {
+        public ASinMultiFunction() : base() { }
+
         public ASinMultiFunction(double coef, MultiMathFunction foundation) : base(coef, foundation)
         {
         }

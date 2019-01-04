@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -40,7 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BigFloat.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="ExtremumSearch\ZeroOrderMethods\CoordinateMethod.cs" />
     <Compile Include="ExtremumSearch\ZeroOrderMethods\RozenbrokMethod.cs" />
     <Compile Include="ExtremumSearch\OneDimensionOptimization\ExtremumMethod.cs" />
     <Compile Include="ExtremumSearch\OneDimensionOptimization\ExtremumType.cs" />
@@ -55,6 +58,7 @@
     <Compile Include="ExtremumSearch\GradientMethods\AdaptiveGradientMethod.cs" />
     <Compile Include="ExtremumSearch\NoConditionExtremumMethod.cs" />
     <Compile Include="ExtremumSearch\INoConditionExtremumMethod.cs" />
+    <Compile Include="Functions\GenericFunctions\GenericMathFunction.cs" />
     <Compile Include="MathStructures\Inequality.cs" />
     <Compile Include="SystemMethods\HoleckiiMethod.cs" />
     <Compile Include="MathStructures\Equation.cs" />
